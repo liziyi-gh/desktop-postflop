@@ -532,3 +532,17 @@ pub fn game_get_chance_reports(
         strategy,
     }
 }
+
+#[tauri::command]
+pub fn save_post_solver_result(
+    game_state: tauri::State<Mutex<PostFlopGame>>,
+    path: String,
+) -> bool {
+    let game = &*game_state.lock().unwrap();
+
+    if path.is_empty() {
+        return false;
+    }
+    save_data_to_file(game, "", path, Some(4)).unwrap();
+    true
+}

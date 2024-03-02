@@ -348,3 +348,10 @@ export const gameGetChanceReports = async (
     strategy: reports.strategy,
   };
 };
+
+export const savePostSolveResult = async (path: string): Promise<boolean> => {
+    const success: boolean = await invoke("save_post_solver_result", {
+        path: path,
+    });
+    return success;
+};

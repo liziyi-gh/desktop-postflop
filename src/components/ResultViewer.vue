@@ -21,6 +21,17 @@
   </div>
 
   <div v-else class="flex flex-col h-full">
+    <!-- TODO: color -->
+    <el-dropdown @command="handleOptions">
+      <el-button type="primary">
+        Options<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item command="saveResult">Save Result</el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
     <ResultNav
       :is-handler-updated="isHandlerUpdated"
       :is-locked="isLocked"
@@ -138,6 +149,8 @@
 import { computed, ref } from "vue";
 import { useStore } from "../store";
 import * as invokes from "../invokes";
+import { ArrowDown } from "@element-plus/icons-vue";
+import { dialog } from "@tauri-apps/api";
 
 import {
   Results,
@@ -311,5 +324,26 @@ const onUpdateHoverContent = (content: HoverContent | null) => {
 
 const onDealCard = (card: number) => {
   dealtCard.value = card;
+};
+
+const handleSaveResult = async () => {
+  let save_path = await dialog.save({
+    defaultPath: "result.psr",
+    filters: [
+      // stand for PostSolver result
+      { name: "Psr Files", extensions: ["psr"] },
+      { name: "All Files", extensions: ["*"] },
+    ],
+  });
+  if (save_path === null) {
+    return;
+  }
+  let success = await invokes.savePostSolveResult(save_path);
+};
+
+const handleOptions = (command: string | number | object) => {
+  if (command === "saveResult") {
+    handleSaveResult();
+  }
 };
 </script>
