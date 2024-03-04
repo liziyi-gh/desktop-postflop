@@ -1,41 +1,27 @@
 <template>
-  <el-upload
-    ref="upload"
-    class="upload-demo"
-    action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-    :limit="1"
-    :on-exceed="handleExceed"
-    :auto-upload="false"
-  >
-    <template #trigger>
-      <el-button type="primary">select file</el-button>
-    </template>
-    <el-button class="ml-3" type="success" @click="submitLoad">
-      Load
-    </el-button>
-    <template #tip>
-      <div class="el-upload__tip text-red">
-        limit 1 file, new file will cover the old file
-      </div>
-    </template>
-  </el-upload>
+  <button class="button-base button-green" @click="submitLoad">Load</button>
 </template>
 
 <script setup lang="ts">
- import { ref } from 'vue'
- import { genFileId } from 'element-plus'
- import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
+ import * as invokes from "../invokes";
+ import { dialog } from "@tauri-apps/api";
 
- const upload = ref<UploadInstance>()
-
- const handleExceed: UploadProps['onExceed'] = (files) => {
-   upload.value!.clearFiles()
-   const file = files[0] as UploadRawFile
-   file.uid = genFileId()
-   upload.value!.handleStart(file)
- }
-
- const submitLoad = () => {
-   upload.value!.submit()
- }
+ const submitLoad = async () => {
+   let load_path = await dialog.open({
+     defaultPath: "result.psr",
+     filters: [
+       // stand for PostSolver result
+       { name: "Psr Files", extensions: ["psr"] },
+       { name: "All Files", extensions: ["*"] },
+     ],
+   });
+   console.log("loadpath is", load_path);
+   if (load_path === null) {
+     return;
+   }
+   if (Array.isArray(load_path)) {
+     return;
+   }
+   let success = await invokes.loadPostSolveResult(load_path);
+ };
 </script>

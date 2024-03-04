@@ -546,3 +546,22 @@ pub fn save_post_solver_result(
     save_data_to_file(game, "", path, Some(4)).unwrap();
     true
 }
+
+#[tauri::command]
+pub fn load_post_solver_result(
+    game_state: tauri::State<Mutex<PostFlopGame>>,
+    path: String,
+) -> bool {
+    let old_game = &mut *game_state.lock().unwrap();
+
+    if old_game.is_solved() && old_game.is_ready() {
+        finalize(old_game);
+    }
+
+    if path.is_empty() {
+        return false;
+    }
+    let game: PostFlopGame = load_data_from_file(path, None).unwrap().0;
+    let _ = std::mem::replace(old_game, game);
+    true
+}

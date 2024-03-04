@@ -355,3 +355,10 @@ export const savePostSolveResult = async (path: string): Promise<boolean> => {
     });
     return success;
 };
+
+export const loadPostSolveResult = async (path: string): Promise<boolean> => {
+    const success: boolean = await invoke("load_post_solver_result", {
+        path: path,
+    });
+    return success;
+};

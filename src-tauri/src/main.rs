@@ -69,7 +69,8 @@ fn main() {
             game_possible_cards,
             game_get_results,
             game_get_chance_reports,
-            save_post_solver_result
+            save_post_solver_result,
+            load_post_solver_result
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
