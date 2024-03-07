@@ -21,8 +21,7 @@
   </div>
 
   <div v-else class="flex flex-col h-full">
-    <!-- TODO: color -->
-    <el-dropdown @command="handleOptions">
+    <el-dropdown class="bar-emerald" @command="handleOptions">
       <el-button type="primary">
         Options<el-icon class="el-icon--right"><arrow-down /></el-icon>
       </el-button>
