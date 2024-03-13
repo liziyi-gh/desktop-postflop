@@ -368,6 +368,8 @@ type CardConfig = {
     flop: number[];
     turn: number;
     river: number;
+    starting_pot: number;
+    effective_stack: number;
 };
 
 export const loadCardConfig = async(): Promise<CardConfig> => {

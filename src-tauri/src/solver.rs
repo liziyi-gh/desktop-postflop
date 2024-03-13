@@ -567,25 +567,30 @@ pub fn load_post_solver_result(
 }
 
 #[derive(Serialize)]
-pub struct FrontEndCardConfig {
+pub struct FrontEndLoadConfig {
     pub range: [Vec<f32>; 2],
     pub flop: [Card; 3],
     pub turn: Card,
     pub river: Card,
+    pub starting_pot: i32,
+    pub effective_stack: i32,
 }
 
 #[tauri::command]
-pub fn load_card_config(
-    game_state: tauri::State<Mutex<PostFlopGame>>,
-) -> FrontEndCardConfig {
+pub fn load_card_config(game_state: tauri::State<Mutex<PostFlopGame>>) -> FrontEndLoadConfig {
     let game = game_state.lock().unwrap();
     let card_config = game.card_config();
 
-    let mut result = FrontEndCardConfig {
-        range: [Vec::with_capacity(52 * 51 / 2), Vec::with_capacity(52 * 51 / 2)],
+    let mut result = FrontEndLoadConfig {
+        range: [
+            Vec::with_capacity(52 * 51 / 2),
+            Vec::with_capacity(52 * 51 / 2),
+        ],
         flop: card_config.flop,
         turn: card_config.turn,
         river: card_config.river,
+        starting_pot: game.tree_config().starting_pot,
+        effective_stack: game.tree_config().effective_stack,
     };
 
     for i in 0..2 {
