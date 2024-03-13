@@ -362,3 +362,16 @@ export const loadPostSolveResult = async (path: string): Promise<boolean> => {
     });
     return success;
 };
+
+type CardConfig = {
+    range: number[][];
+    flop: number[];
+    turn: number;
+    river: number;
+};
+
+export const loadCardConfig = async(): Promise<CardConfig> => {
+    const back_end_card_config: CardConfig = await invoke("load_card_config");
+
+    return back_end_card_config;
+}

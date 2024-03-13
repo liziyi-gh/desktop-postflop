@@ -565,3 +565,46 @@ pub fn load_post_solver_result(
     let _ = std::mem::replace(old_game, game);
     true
 }
+
+#[derive(Serialize)]
+pub struct FrontEndCardConfig {
+    pub range: [Vec<f32>; 2],
+    pub flop: [Card; 3],
+    pub turn: Card,
+    pub river: Card,
+}
+
+#[tauri::command]
+pub fn load_card_config(
+    game_state: tauri::State<Mutex<PostFlopGame>>,
+) -> FrontEndCardConfig {
+    let game = game_state.lock().unwrap();
+    let card_config = game.card_config();
+
+    let mut result = FrontEndCardConfig {
+        range: [Vec::with_capacity(52 * 51 / 2), Vec::with_capacity(52 * 51 / 2)],
+        flop: card_config.flop,
+        turn: card_config.turn,
+        river: card_config.river,
+    };
+
+    for i in 0..2 {
+        for j in 0..(52 * 51 / 2) {
+            result.range[i].push(card_config.range[i].raw_data()[j])
+        }
+    }
+
+    result
+}
+
+// #[tauri::command]
+// pub fn load_tree_config(
+//     game_state: tauri::State<Mutex<PostFlopGame>>,
+// ) -> FronEndTreeConfig {
+//     let game = game_state.lock().unwrap();
+//     let _result : TreeConfig;
+
+//     let _result = game.tree_config().clone();
+
+//     _result
+// }
