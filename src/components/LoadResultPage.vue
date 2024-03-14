@@ -15,19 +15,18 @@ import * as invokes from "../invokes";
 import { dialog } from "@tauri-apps/api";
 
 const store = useStore();
-const config = useConfigStore();
 const saved_config = useSavedConfigStore();
 
 const submitLoad = async () => {
   let load_path = await dialog.open({
     defaultPath: "result.psr",
     filters: [
-      // stand for PostSolver result
+      // Psr: PostSolver result
       { name: "Psr Files", extensions: ["psr"] },
       { name: "All Files", extensions: ["*"] },
     ],
   });
-  console.log("loadpath is", load_path);
+
   if (load_path === null) {
     return;
   }
@@ -36,7 +35,6 @@ const submitLoad = async () => {
   }
   let success = await invokes.loadPostSolveResult(load_path);
   if (!success) {
-    console.log("load result failed!");
     return;
   }
 

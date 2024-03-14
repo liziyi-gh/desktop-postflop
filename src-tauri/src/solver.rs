@@ -601,15 +601,3 @@ pub fn load_card_config(game_state: tauri::State<Mutex<PostFlopGame>>) -> FrontE
 
     result
 }
-
-// #[tauri::command]
-// pub fn load_tree_config(
-//     game_state: tauri::State<Mutex<PostFlopGame>>,
-// ) -> FronEndTreeConfig {
-//     let game = game_state.lock().unwrap();
-//     let _result : TreeConfig;
-
-//     let _result = game.tree_config().clone();
-
-//     _result
-// }
