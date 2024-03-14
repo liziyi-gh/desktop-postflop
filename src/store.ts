@@ -10,6 +10,7 @@ export type SideView =
   | "tree-config"
   | "bunching"
   | "run-solver"
+  | "load-result"
   | "about";
 
 export const saveConfigTmp = () => {
@@ -92,6 +93,7 @@ export const useStore = defineStore("app", {
       "tree-config": ["Tree Configuration"],
       bunching: ["Bunching Effect"],
       "run-solver": ["Run Solver"],
+      "load-result": ["Load Result"],
     },
     ranges: Array.from({ length: 6 }, () =>
       Array.from({ length: 13 * 13 }, () => 0)

@@ -348,3 +348,32 @@ export const gameGetChanceReports = async (
     strategy: reports.strategy,
   };
 };
+
+export const savePostSolveResult = async (path: string): Promise<boolean> => {
+    const success: boolean = await invoke("save_post_solver_result", {
+        path: path,
+    });
+    return success;
+};
+
+export const loadPostSolveResult = async (path: string): Promise<boolean> => {
+    const success: boolean = await invoke("load_post_solver_result", {
+        path: path,
+    });
+    return success;
+};
+
+type CardConfig = {
+    range: number[][];
+    flop: number[];
+    turn: number;
+    river: number;
+    starting_pot: number;
+    effective_stack: number;
+};
+
+export const loadCardConfig = async(): Promise<CardConfig> => {
+    const back_end_card_config: CardConfig = await invoke("load_card_config");
+
+    return back_end_card_config;
+}

@@ -532,3 +532,72 @@ pub fn game_get_chance_reports(
         strategy,
     }
 }
+
+#[tauri::command]
+pub fn save_post_solver_result(
+    game_state: tauri::State<Mutex<PostFlopGame>>,
+    path: String,
+) -> bool {
+    let game = &*game_state.lock().unwrap();
+
+    if path.is_empty() {
+        return false;
+    }
+    save_data_to_file(game, "", path, Some(4)).unwrap();
+    true
+}
+
+#[tauri::command]
+pub fn load_post_solver_result(
+    game_state: tauri::State<Mutex<PostFlopGame>>,
+    path: String,
+) -> bool {
+    let old_game = &mut *game_state.lock().unwrap();
+
+    if old_game.is_solved() && old_game.is_ready() {
+        finalize(old_game);
+    }
+
+    if path.is_empty() {
+        return false;
+    }
+    let game: PostFlopGame = load_data_from_file(path, None).unwrap().0;
+    let _ = std::mem::replace(old_game, game);
+    true
+}
+
+#[derive(Serialize)]
+pub struct FrontEndLoadConfig {
+    pub range: [Vec<f32>; 2],
+    pub flop: [Card; 3],
+    pub turn: Card,
+    pub river: Card,
+    pub starting_pot: i32,
+    pub effective_stack: i32,
+}
+
+#[tauri::command]
+pub fn load_card_config(game_state: tauri::State<Mutex<PostFlopGame>>) -> FrontEndLoadConfig {
+    let game = game_state.lock().unwrap();
+    let card_config = game.card_config();
+
+    let mut result = FrontEndLoadConfig {
+        range: [
+            Vec::with_capacity(52 * 51 / 2),
+            Vec::with_capacity(52 * 51 / 2),
+        ],
+        flop: card_config.flop,
+        turn: card_config.turn,
+        river: card_config.river,
+        starting_pot: game.tree_config().starting_pot,
+        effective_stack: game.tree_config().effective_stack,
+    };
+
+    for i in 0..2 {
+        for j in 0..(52 * 51 / 2) {
+            result.range[i].push(card_config.range[i].raw_data()[j])
+        }
+    }
+
+    result
+}

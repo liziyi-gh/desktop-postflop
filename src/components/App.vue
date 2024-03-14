@@ -42,6 +42,9 @@
         <div v-show="store.sideView === 'run-solver'">
           <RunSolver />
         </div>
+        <div v-show="store.sideView === 'load-result'" >
+          <LoadResultPage />
+        </div>
         <div v-if="store.sideView === 'about'">
           <AboutPage />
         </div>
@@ -70,6 +73,7 @@ import BunchingEffect from "./BunchingEffect.vue";
 import RunSolver from "./RunSolver.vue";
 import AboutPage from "./AboutPage.vue";
 import ResultViewer from "./ResultViewer.vue";
+import LoadResultPage from "./LoadResultPage.vue";
 
 const store = useStore();
 const header = computed(() => store.headers[store.sideView].join(" > "));

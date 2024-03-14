@@ -32,6 +32,10 @@ body {
   @apply bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:bg-green-600;
 }
 
+.bar-emerald {
+  @apply bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:bg-emerald-600;
+}
+
 input.input-error {
   @apply !ring-1 !ring-red-600 !border-red-600 !bg-red-50;
 }
