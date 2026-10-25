@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import { Results, ChanceReports } from "./result-types";
 
 export const osName = async (): Promise<"windows" | "macos" | "linux"> => {
@@ -349,31 +349,49 @@ export const gameGetChanceReports = async (
   };
 };
 
-export const savePostSolveResult = async (path: string): Promise<boolean> => {
-    const success: boolean = await invoke("save_post_solver_result", {
-        path: path,
-    });
-    return success;
+export const savePostSolveResult = async (path: string): Promise<void> => {
+  await invoke("save_post_solver_result", {
+    path: path,
+  });
 };
 
-export const loadPostSolveResult = async (path: string): Promise<boolean> => {
-    const success: boolean = await invoke("load_post_solver_result", {
-        path: path,
-    });
-    return success;
+export const loadPostSolveResult = async (path: string): Promise<void> => {
+  await invoke("load_post_solver_result", {
+    path: path,
+  });
 };
 
 type CardConfig = {
-    range: number[][];
-    flop: number[];
-    turn: number;
-    river: number;
-    starting_pot: number;
-    effective_stack: number;
+  range: number[][];
+  flop: number[];
+  turn: number;
+  river: number;
+  starting_pot: number;
+  effective_stack: number;
 };
 
-export const loadCardConfig = async(): Promise<CardConfig> => {
-    const back_end_card_config: CardConfig = await invoke("load_card_config");
+export type NodeLockInfo = {
+  history: number[];
+  player: number;
+  actions: string[];
+  cards: number[];
+  strategy: number[];
+  locking: number[] | null;
+};
 
-    return back_end_card_config;
-}
+export const gameNodeLockInfo = (): Promise<NodeLockInfo> =>
+  invoke("game_node_lock_info");
+
+export const gameSolveNodeLock = (
+  history: number[],
+  strategy: number[] | null,
+  iterations: number,
+  target: number
+): Promise<number> =>
+  invoke("game_solve_node_lock", { history, strategy, iterations, target });
+
+export const loadCardConfig = async (): Promise<CardConfig> => {
+  const back_end_card_config: CardConfig = await invoke("load_card_config");
+
+  return back_end_card_config;
+};

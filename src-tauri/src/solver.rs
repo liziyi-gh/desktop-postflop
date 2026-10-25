@@ -533,37 +533,43 @@ pub fn game_get_chance_reports(
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn save_post_solver_result(
     game_state: tauri::State<Mutex<PostFlopGame>>,
     path: String,
-) -> bool {
-    let game = &*game_state.lock().unwrap();
+) -> Result<(), String> {
+    let game = &*game_state.lock().map_err(|e| e.to_string())?;
 
     if path.is_empty() {
-        return false;
+        return Err("Choose a result file.".into());
     }
-    save_data_to_file(game, "", path, Some(4)).unwrap();
-    true
+    if !game.is_solved() {
+        return Err("Only finalized results can be saved.".into());
+    }
+    crate::persistence::save_result(game, std::path::Path::new(&path))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn load_post_solver_result(
     game_state: tauri::State<Mutex<PostFlopGame>>,
     path: String,
-) -> bool {
-    let old_game = &mut *game_state.lock().unwrap();
-
-    if old_game.is_solved() && old_game.is_ready() {
-        finalize(old_game);
-    }
-
+) -> Result<(), String> {
     if path.is_empty() {
-        return false;
+        return Err("Choose a result file.".into());
     }
-    let game: PostFlopGame = load_data_from_file(path, None).unwrap().0;
-    let _ = std::mem::replace(old_game, game);
-    true
+    // Decoding a solved result also finalizes it internally. Serialize that work with
+    // solver commands because the custom allocator cannot solve two games concurrently.
+    let mut current_game = game_state.lock().map_err(|e| e.to_string())?;
+    // A failed load must leave the current result intact.
+    let mut game: PostFlopGame = load_data_from_file(path, None)
+        .map_err(|e| e.to_string())?
+        .0;
+    if !game.is_solved() {
+        return Err("The file does not contain a finalized result.".into());
+    }
+    game.back_to_root();
+    *current_game = game;
+    Ok(())
 }
 
 #[derive(Serialize)]
@@ -581,23 +587,15 @@ pub fn load_card_config(game_state: tauri::State<Mutex<PostFlopGame>>) -> FrontE
     let game = game_state.lock().unwrap();
     let card_config = game.card_config();
 
-    let mut result = FrontEndLoadConfig {
+    FrontEndLoadConfig {
         range: [
-            Vec::with_capacity(52 * 51 / 2),
-            Vec::with_capacity(52 * 51 / 2),
+            card_config.range[0].raw_data().to_vec(),
+            card_config.range[1].raw_data().to_vec(),
         ],
         flop: card_config.flop,
         turn: card_config.turn,
         river: card_config.river,
         starting_pot: game.tree_config().starting_pot,
         effective_stack: game.tree_config().effective_stack,
-    };
-
-    for i in 0..2 {
-        for j in 0..(52 * 51 / 2) {
-            result.range[i].push(card_config.range[i].raw_data()[j])
-        }
     }
-
-    result
 }

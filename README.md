@@ -41,7 +41,7 @@ See the [WASM Postflop repository] for more detailed comparisons, including some
   - Windows: 10/11
   - macOS: 11.7 and later
     - We do not distribute macOS builds because we are not enrolled in the Apple Developer Program and cannot sign the app (please see the "Build" section below and build it yourself).
-  - Linux: glibc 2.31 and later (e.g., Ubuntu 20.04 and later)
+  - Linux: GTK 3 and WebKitGTK 4.1 (e.g., Ubuntu 22.04 and later)
 - CPU
   - x86-64: must support AVX2 instructions
     - Intel: Haswell (2013) and later
@@ -75,14 +75,17 @@ C:\Users\<username>\AppData\Local\b-inary.desktop-postflop
 
 ## Build
 
-[Rust] and [Node.js] need to be installed to build.
-On Linux, you will also need to install some dependencies; please see the [Tauri documentation] for details.
-For better performance, we also recommend installing the Rust nightly channel:
+[Rust] (via rustup) and Node.js 22 or later need to be installed to build.
+This project uses Tauri 2. On Linux, install GTK 3 and **WebKitGTK 4.1** development packages;
+the old WebKitGTK 4.0 package is no longer used. See the [Tauri documentation] for details.
+The project pins its nightly toolchain in [rust-toolchain.toml](./rust-toolchain.toml)
+for the solver's custom allocator; rustup selects it automatically without changing your global default.
 
-```sh
-$ rustup install nightly
-$ rustup default nightly
-```
+Place your maintained `postflop-solver` repository beside this repository. The Cargo path
+dependency uses `../postflop-solver` relative to the desktop repository root. This local
+backend must include `PostFlopGame::restart_solving()` for node locking.
+The release workflow similarly checks out `postflop-solver` from the same GitHub owner,
+so publish the backend changes there before running CI.
 
 Then clone this reporitory and run the following commands:
 
@@ -93,18 +96,19 @@ $ npm run tauri build
 
 If the build was successful, you should be able to find the application in the `src-tauri/target/release/bundle/` directory.
 
-If you want to use stable Rust instead of nightly Rust, please modify the following line in `src-tauri/Cargo.toml` (performance will be sacrificed):
+If you want to use stable Rust (at least 1.90) instead of nightly Rust, remove the
+`custom-alloc` feature in `src-tauri/Cargo.toml` and select stable explicitly:
 
 ```diff
 [dependencies]
 ...
-- postflop-solver = { git = "https://github.com/b-inary/postflop-solver", features = ["custom-alloc"] }
-+ postflop-solver = { git = "https://github.com/b-inary/postflop-solver" }
+- postflop-solver = { path = "../../postflop-solver", features = ["custom-alloc", "zstd"] }
++ postflop-solver = { path = "../../postflop-solver", features = ["zstd"] }
 ```
 
 [Rust]: https://www.rust-lang.org/learn/get-started
 [Node.js]: https://nodejs.org/en/
-[Tauri documentation]: https://tauri.app/v1/guides/getting-started/prerequisites/#setting-up-linux
+[Tauri documentation]: https://v2.tauri.app/start/prerequisites/
 
 ## ~~Roadmap (in order of priority)~~
 

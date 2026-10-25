@@ -104,6 +104,7 @@ export const useStore = defineStore("app", {
     isSolverRunning: false,
     isSolverPaused: false,
     isSolverFinished: false,
+    resultRevision: 0,
     isSolverError: false,
     isFinalizing: false,
   }),

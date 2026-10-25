@@ -7,42 +7,53 @@ on:
 
 jobs:
   release:
+    defaults:
+      run:
+        working-directory: desktop-postflop
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest, ubuntu-20.04]
+        platform: [windows-latest, ubuntu-22.04]
     runs-on: ${{ matrix.platform }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          path: desktop-postflop
+
+      - name: Checkout maintained solver
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/postflop-solver
+          path: postflop-solver
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Setup Rust nightly
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@master
         with:
-          components: rust-src
+          toolchain: nightly-2026-10-24
 
       - name: Install dependencies (Linux)
-        if: matrix.platform == 'ubuntu-20.04'
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev librsvg2-dev
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev librsvg2-dev libayatana-appindicator3-dev patchelf
 
       - name: Install app dependencies
         run: npm ci
 
       - name: Build the app (Windows)
         if: matrix.platform == 'windows-latest'
-        run: npm run tauri build -- --target x86_64-pc-windows-msvc -- -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort
+        run: npm run tauri build -- --target x86_64-pc-windows-msvc
 
       - name: Build the app (Linux)
-        if: matrix.platform == 'ubuntu-20.04'
-        run: npm run tauri build -- --target x86_64-unknown-linux-gnu -- -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort
+        if: matrix.platform == 'ubuntu-22.04'
+        run: npm run tauri build -- --target x86_64-unknown-linux-gnu
 
       - name: Upload artifacts (Windows)
         if: matrix.platform == 'windows-latest'
@@ -50,14 +61,14 @@ jobs:
         with:
           draft: true
           files: |
-            src-tauri/target/x86_64-pc-windows-msvc/release/Desktop Postflop.exe
-            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/Desktop Postflop_*_x64_en-US.msi
+            desktop-postflop/src-tauri/target/x86_64-pc-windows-msvc/release/desktop-postflop.exe
+            desktop-postflop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
 
       - name: Upload artifacts (Linux)
-        if: matrix.platform == 'ubuntu-20.04'
+        if: matrix.platform == 'ubuntu-22.04'
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           files: |
-            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/desktop-postflop_*_amd64.deb
-            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/desktop-postflop_*_amd64.AppImage
+            desktop-postflop/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
+            desktop-postflop/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage

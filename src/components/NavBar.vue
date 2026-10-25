@@ -15,6 +15,9 @@
           href="https://github.com/b-inary/desktop-postflop"
           class="flex px-4 h-full items-center font-semibold hover:bg-slate-700"
           target="_blank"
+          @click.prevent="
+            openUrl('https://github.com/b-inary/desktop-postflop')
+          "
         >
           <img
             src="../assets/GitHub-Mark-Light-32px.png"
@@ -55,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { useStore } from "../store";
 import { ComputerDesktopIcon, ChartBarIcon } from "@heroicons/vue/24/solid";
 

@@ -467,8 +467,8 @@
 import { computed, nextTick, ref } from "vue";
 import * as Db from "../db";
 
-import { open, save } from "@tauri-apps/api/dialog";
-import { readTextFile, writeTextFile } from "@tauri-apps/api/fs";
+import { open, save } from "@tauri-apps/plugin-dialog";
+import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 
 import { XMarkIcon } from "@heroicons/vue/20/solid";
 
@@ -1223,13 +1223,13 @@ const getItemsToAdd = async (array: JsonItem[]) => {
 const importJson = async () => {
   if (errorOccured.value || isEditing.value) return;
 
-  let filePath = await open({
+  const filePath = await open({
+    multiple: false,
     defaultPath: `${props.storeName}.json`,
     filters: [{ name: "JSON Files", extensions: ["json"] }],
   });
 
-  if (!filePath) return;
-  if (Array.isArray(filePath)) filePath = filePath[0];
+  if (typeof filePath !== "string") return;
 
   importError.value = "";
 

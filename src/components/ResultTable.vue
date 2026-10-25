@@ -369,8 +369,8 @@ import {
   TableMode,
 } from "../result-types";
 
-import { save } from "@tauri-apps/api/dialog";
-import { writeTextFile } from "@tauri-apps/api/fs";
+import { save } from "@tauri-apps/plugin-dialog";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 
 import { Tippy } from "vue-tippy";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/solid";

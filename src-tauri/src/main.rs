@@ -4,10 +4,13 @@
 )]
 
 mod bunching;
+mod node_lock;
+mod persistence;
 mod range;
 mod solver;
 mod tree;
 use crate::bunching::*;
+use crate::node_lock::*;
 use crate::range::*;
 use crate::solver::*;
 use crate::tree::*;
@@ -19,6 +22,9 @@ use sysinfo::{System, SystemExt};
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_opener::init())
         .manage(Mutex::new(RangeManager::default()))
         .manage(Mutex::new(default_action_tree()))
         .manage(Mutex::new(None as Option<BunchingData>))
@@ -72,6 +78,8 @@ fn main() {
             save_post_solver_result,
             load_post_solver_result,
             load_card_config,
+            game_node_lock_info,
+            game_solve_node_lock,
             // load_tree_config
         ])
         .run(tauri::generate_context!())
