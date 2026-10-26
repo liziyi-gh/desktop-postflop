@@ -9,6 +9,7 @@
     "build": "vue-tsc && vite build",
     "tauri": "tauri",
     "lint": "eslint src/**/*.{ts,vue}",
+    "test:launch-api": "node --test scripts/launch-api.test.cjs",
     "format": "prettier --write src/**/*.{ts,vue}"
   },
   "dependencies": {

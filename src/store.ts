@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { sanitizeBetString } from "./utils";
+import type { LaunchContext } from "./startup";
 
 export type NavView = "solver" | "results";
 
@@ -83,6 +84,8 @@ export const saveConfig = () => {
 
 export const useStore = defineStore("app", {
   state: () => ({
+    launchContext: null as LaunchContext | null,
+    launchRequestId: null as string | null,
     navView: "solver" as NavView,
     sideView: "oop-range" as SideView,
     headers: {

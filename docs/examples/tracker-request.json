@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "requestId": "tracker-hand-123-turn",
+  "context": {
+    "source": "MyPokerTracker",
+    "handId": "123",
+    "heroPosition": "ip",
+    "heroCards": ["Qh", "Qs"]
+  },
+  "spot": {
+    "board": ["As", "Kd", "2c", "7h"],
+    "ranges": { "oop": "AA,KK,AKs,AKo", "ip": "QQ,JJ,TT" },
+    "startingPot": 200,
+    "effectiveStack": 900,
+    "rakePercent": 5,
+    "rakeCap": 30
+  },
+  "tree": {
+    "turn": {
+      "oop": { "bet": "50%,100%", "raise": "2.5x" },
+      "ip": { "bet": "50%,100%", "raise": "2.5x" }
+    },
+    "river": {
+      "oop": { "bet": "75%,a", "raise": "a" },
+      "ip": { "bet": "75%,a", "raise": "a" }
+    }
+  },
+  "extensions": { "com.example.tracker": { "tableId": "table-9" } }
+}

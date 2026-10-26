@@ -65,6 +65,16 @@ You can download the app from the [GitHub releases page].
 
 [WebView2 runtime]: https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section
 
+## Tracker integration / launch API
+
+The solver accepts `--import <request.json>` to open an analysis spot with board,
+OOP/IP ranges, pot, stack and betting sizes. Use `--capabilities` for versioned
+feature discovery and `--validate <request.json>` to check a request without opening
+the GUI. Non-GUI commands support `--output <path>` for machine-readable responses.
+See the [launch API contract](./docs/launch-api.md),
+[JSON Schema](./docs/launch-request.schema.json) and
+[example request](./docs/examples/tracker-request.json).
+
 ## Uninstall
 
 On Windows, please remove the following folder after the regular uninstallation to completely uninstall Desktop Postflop:

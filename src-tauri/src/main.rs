@@ -8,6 +8,7 @@ mod node_lock;
 mod persistence;
 mod range;
 mod solver;
+mod startup;
 mod tree;
 use crate::bunching::*;
 use crate::node_lock::*;
@@ -21,16 +22,26 @@ use std::sync::Mutex;
 use sysinfo::{System, SystemExt};
 
 fn main() {
+    let launch = match startup::prepare() {
+        Ok(Some(launch)) => launch,
+        Ok(None) => return,
+        Err((code, error)) => {
+            eprintln!("{error}");
+            std::process::exit(code);
+        }
+    };
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
-        .manage(Mutex::new(RangeManager::default()))
+        .manage(Mutex::new(launch.ranges))
+        .manage(Mutex::new(startup::StartupState(launch.request)))
         .manage(Mutex::new(default_action_tree()))
         .manage(Mutex::new(None as Option<BunchingData>))
         .manage(Mutex::new(PostFlopGame::default()))
         .manage(Mutex::new(ThreadPoolBuilder::new().build().unwrap()))
         .invoke_handler(tauri::generate_handler![
+            startup::startup_request,
             os_name,
             memory,
             set_num_threads,

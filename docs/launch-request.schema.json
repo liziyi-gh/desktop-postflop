@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Desktop Postflop launch request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "requestId": {
+      "type": ["string", "null"]
+    },
+    "context": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/context"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "spot": {
+      "$ref": "#/$defs/spot"
+    },
+    "tree": {
+      "$ref": "#/$defs/tree"
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Application metadata keyed by namespace; never executed."
+    }
+  },
+  "required": ["schemaVersion", "spot"],
+  "$defs": {
+    "card": {
+      "type": "string",
+      "pattern": "^[2-9TJQKA][cdhs]$"
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": ["string", "null"]
+        },
+        "handId": {
+          "type": ["string", "null"]
+        },
+        "heroPosition": {
+          "enum": ["oop", "ip", null]
+        },
+        "heroCards": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/card"
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "spot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "board": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/card"
+          },
+          "minItems": 3,
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "ranges": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "oop": {
+              "type": "string",
+              "minLength": 1
+            },
+            "ip": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["oop", "ip"]
+        },
+        "startingPot": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30000
+        },
+        "effectiveStack": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30000
+        },
+        "rakePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 0
+        },
+        "rakeCap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 90000,
+          "default": 0
+        }
+      },
+      "required": ["board", "ranges", "startingPot", "effectiveStack"]
+    },
+    "sizes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bet": {
+          "type": "string",
+          "default": ""
+        },
+        "raise": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
+    "street": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "oop": {
+          "$ref": "#/$defs/sizes"
+        },
+        "ip": {
+          "$ref": "#/$defs/sizes"
+        }
+      }
+    },
+    "tree": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "flop": {
+          "$ref": "#/$defs/street"
+        },
+        "turn": {
+          "$ref": "#/$defs/street"
+        },
+        "river": {
+          "$ref": "#/$defs/street"
+        },
+        "addAllInThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3000000,
+          "default": 150
+        },
+        "forceAllInThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3000000,
+          "default": 20
+        },
+        "mergingThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3000000,
+          "default": 10
+        }
+      }
+    }
+  }
+}

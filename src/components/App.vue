@@ -24,6 +24,26 @@
           </div>
         </div>
 
+        <div
+          v-if="store.launchContext || store.launchRequestId"
+          class="mb-4 px-3 py-2 rounded bg-blue-50 text-sm"
+        >
+          Imported analysis
+          <span v-if="store.launchContext?.source">
+            · {{ store.launchContext.source }}</span
+          >
+          <span v-if="store.launchContext?.handId">
+            · Hand {{ store.launchContext.handId }}</span
+          >
+          <span v-if="store.launchContext?.heroCards">
+            · Hero {{ store.launchContext.heroPosition?.toUpperCase() }}
+            {{ store.launchContext.heroCards.join(" ") }}
+          </span>
+          <span v-if="store.launchRequestId">
+            · Request {{ store.launchRequestId }}</span
+          >
+        </div>
+
         <div v-show="store.sideView === 'oop-range'">
           <RangeEditor :player="0" />
         </div>
@@ -42,7 +62,7 @@
         <div v-show="store.sideView === 'run-solver'">
           <RunSolver />
         </div>
-        <div v-show="store.sideView === 'load-result'" >
+        <div v-show="store.sideView === 'load-result'">
           <LoadResultPage />
         </div>
         <div v-if="store.sideView === 'about'">
