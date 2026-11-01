@@ -244,7 +244,7 @@ const cellData = computed(() => {
 });
 
 const { selectedSpot, displayPlayer } = toRefs(props);
-watch([selectedSpot, displayPlayer], () => {
+watch([selectedSpot, displayPlayer, () => props.results], () => {
   clickedCellIndex.value = -1;
   emit("update-hover-content", null);
 });

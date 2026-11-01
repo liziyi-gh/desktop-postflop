@@ -346,7 +346,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, toRefs, watch } from "vue";
+import { computed, onUnmounted, reactive, ref, toRefs, watch } from "vue";
 
 import {
   ranks,
@@ -538,8 +538,14 @@ const assignTableHeight = () => {
   }
 };
 
-watch(tableDiv, assignTableHeight);
-window.addEventListener("resize", assignTableHeight);
+// Expanding the hand filters changes table height without resizing the window.
+const tableResizeObserver = new ResizeObserver(assignTableHeight);
+watch(tableDiv, (element, previous) => {
+  if (previous) tableResizeObserver.unobserve(previous);
+  if (element) tableResizeObserver.observe(element);
+  assignTableHeight();
+});
+onUnmounted(() => tableResizeObserver.disconnect());
 
 const pairText = (pair: number) => {
   const card1 = pair & 0xff;

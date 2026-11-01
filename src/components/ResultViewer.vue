@@ -65,8 +65,31 @@
       @reset-copy-success="resetCopySuccess"
     />
 
+    <ResultHandFilter
+      v-if="
+        store.navView === 'results' &&
+        selectedSpot &&
+        results &&
+        filteredResults &&
+        displayMode !== 'chance'
+      "
+      v-model:filters="handFilters"
+      :features="handFeatures"
+      :results="results"
+      :filtered-results="filteredResults"
+      :selected-spot="selectedSpot"
+      :display-player="displayPlayerBasics"
+    />
+    <p
+      v-if="displayMode === 'chance' && handFilters.some(isHandFilterActive)"
+      class="px-4 py-1 text-sm"
+    >
+      Hand filters are paused in Chance view; chance reports show the full
+      ranges.
+    </p>
+
     <div
-      v-if="store.navView === 'results' && selectedSpot && results"
+      v-if="store.navView === 'results' && selectedSpot && filteredResults"
       class="flex flex-grow min-h-0"
     >
       <template v-if="displayMode === 'basics'">
@@ -77,7 +100,7 @@
           :selected-chance="selectedChance"
           :current-board="currentBoard"
           :total-bet-amount="totalBetAmount"
-          :results="results"
+          :results="filteredResults"
           :display-options="displayOptions"
           :display-player="displayPlayerBasics"
           :is-compare-mode="false"
@@ -89,7 +112,7 @@
           table-mode="basics"
           :cards="cards"
           :selected-spot="selectedSpot"
-          :results="results"
+          :results="filteredResults"
           :display-player="displayPlayerBasics"
           :hover-content="basicsHoverContent"
         />
@@ -100,7 +123,7 @@
           :cards="cards"
           :selected-spot="selectedSpot"
           :selected-chance="selectedChance"
-          :results="results"
+          :results="filteredResults"
           :chance-reports="chanceReports"
           :display-options="displayOptions"
           :display-player="displayPlayerBasics"
@@ -115,7 +138,7 @@
           :selected-chance="selectedChance"
           :current-board="currentBoard"
           :total-bet-amount="totalBetAmount"
-          :results="results"
+          :results="filteredResults"
           :display-options="displayOptions"
           display-player="oop"
           :is-compare-mode="true"
@@ -125,7 +148,7 @@
           style="flex: 2"
           :selected-spot="selectedSpot"
           :selected-chance="selectedChance"
-          :results="results"
+          :results="filteredResults"
         />
 
         <ResultBasics
@@ -135,7 +158,7 @@
           :selected-chance="selectedChance"
           :current-board="currentBoard"
           :total-bet-amount="totalBetAmount"
-          :results="results"
+          :results="filteredResults"
           :display-options="displayOptions"
           display-player="ip"
           :is-compare-mode="true"
@@ -175,6 +198,14 @@ import {
   HoverContent,
 } from "../result-types";
 
+import ResultHandFilter from "./ResultHandFilter.vue";
+import {
+  classifyHand,
+  emptyHandFilter,
+  filterResults,
+  isHandFilterActive,
+} from "../hand-filter";
+import type { HandFilter } from "../hand-filter";
 import ResultNav from "./ResultNav.vue";
 import ResultMiddle from "./ResultMiddle.vue";
 import ResultBasics from "./ResultBasics.vue";
@@ -214,8 +245,25 @@ const currentBoard = ref<number[]>([]);
 const results = ref<Results | null>(null);
 const chanceReports = ref<ChanceReports | null>(null);
 const totalBetAmount = ref([0, 0]);
+const handFilters = ref<HandFilter[]>([emptyHandFilter(), emptyHandFilter()]);
+const handFeatures = computed(() =>
+  cards.value.map((hands) =>
+    hands.map((pair) => classifyHand(pair, currentBoard.value))
+  )
+);
+const filteredResults = computed(() =>
+  results.value
+    ? filterResults(
+        results.value,
+        cards.value,
+        handFeatures.value,
+        handFilters.value
+      )
+    : null
+);
 
 const init = async () => {
+  handFilters.value = [emptyHandFilter(), emptyHandFilter()];
   cards.value = await invokes.gamePrivateCards();
   isHandlerUpdated.value = true;
 };
@@ -245,6 +293,11 @@ const onUpdateSpot = (
   newChanceReports: ChanceReports | null,
   newTotalBetAmount: number[]
 ) => {
+  // Action indices belong to a particular node and must not carry across nodes.
+  handFilters.value = handFilters.value.map((filter) => ({
+    ...filter,
+    action: -1,
+  }));
   dealtCard.value = -1;
   selectedSpot.value = newSelectedSpot;
   selectedChance.value = newSelectedChance;
@@ -342,6 +395,9 @@ const displayPlayerChance = computed(() => {
 /* Results */
 
 const basicsHoverContent = ref<HoverContent | null>(null);
+watch(filteredResults, () => {
+  basicsHoverContent.value = null;
+});
 
 const onUpdateHoverContent = (content: HoverContent | null) => {
   basicsHoverContent.value = content;

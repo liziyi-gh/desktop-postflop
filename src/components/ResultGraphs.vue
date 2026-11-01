@@ -199,7 +199,7 @@ const chartData = computed((): ChartData<"line", Point[]> => {
       currX = nextX;
     }
 
-    if (currX <= xTicks) {
+    if (tuples.length && currX <= xTicks) {
       const lastTuple = tuples[tuples.length - 1];
       dataPlayer.push({ x: 1, y: lastTuple[2], label: lastTuple[0] });
     }

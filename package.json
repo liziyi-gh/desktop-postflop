@@ -10,6 +10,7 @@
     "tauri": "tauri",
     "lint": "eslint src/**/*.{ts,vue}",
     "test:launch-api": "node --test scripts/launch-api.test.cjs",
+    "test:hand-filter": "node --test scripts/hand-filter.test.cjs",
     "format": "prettier --write src/**/*.{ts,vue}"
   },
   "dependencies": {

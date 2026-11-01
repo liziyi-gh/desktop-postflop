@@ -123,37 +123,11 @@ If you want to use stable Rust (at least 1.90) instead of nightly Rust, remove t
 [Node.js]: https://nodejs.org/en/
 [Tauri documentation]: https://v2.tauri.app/start/prerequisites/
 
-## Publishing a release
-
-Push a version tag to run the GitHub Actions release workflow. It builds Windows
-x86-64 (`.msi` and portable `.exe`), Linux x86-64 (`.deb` and `.AppImage`),
-and macOS Apple silicon (`.dmg`). Once all three builds succeed, the workflow
-publishes a GitHub Release with generated notes; a version containing a hyphen
-is marked as a prerelease. The macOS build is unsigned and not notarized.
-
-Before tagging, update the version in `package.json`, `package-lock.json`,
-`src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml` to the same value.
-For example, `npm version 0.2.8 --no-git-tag-version` updates both npm files;
-update the two Tauri/Rust files separately and commit all changes. Then push the
-commit and its tag (replace `lzy-gh` with your remote name if needed):
-
-```sh
-git push lzy-gh HEAD
-git tag v0.2.8
-git push lzy-gh v0.2.8
-```
-
-The tag must start with `v` and match all four version files. Check the Actions
-tab for progress and failures. Each build fetches the latest `postflop-solver`
-commit on `main` directly from GitHub. Push local solver changes before creating
-the desktop release tag. Rebuilding the same tag can use a newer solver commit.
-The release job needs permission to write repository contents.
-
 ## ~~Roadmap (in order of priority)~~
 
-- Results saving/loading feature ([#8](https://github.com/b-inary/desktop-postflop/issues/8))
-- Hand filter feature for the result viewer ([#6](https://github.com/b-inary/desktop-postflop/issues/6))
-- Node-locking feature
+- [x] Results saving/loading feature ([#8](https://github.com/b-inary/desktop-postflop/issues/8))
+- [x] Hand filter feature for the result viewer ([#6](https://github.com/b-inary/desktop-postflop/issues/6))
+- [x] Node-locking feature
 - Short deck support
 - Aggregated reporting feature for multiple flops
 - GTO training mode ([#9](https://github.com/b-inary/desktop-postflop/issues/9))
