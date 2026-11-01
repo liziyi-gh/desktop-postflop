@@ -29,7 +29,6 @@ However, if you want to use the solver for more serious purposes, please conside
   - Able to use more than 4GB of memory
 - **Disadvantages**:
   - Needs to download the program and trust the execution
-  - macOS builds are not distributed (you need to build the app yourself)
 
 See the [WASM Postflop repository] for more detailed comparisons, including some commercial solvers.
 
@@ -40,7 +39,7 @@ See the [WASM Postflop repository] for more detailed comparisons, including some
 - OS
   - Windows: 10/11
   - macOS: 11.7 and later
-    - We do not distribute macOS builds because we are not enrolled in the Apple Developer Program and cannot sign the app (please see the "Build" section below and build it yourself).
+    - Release builds are unsigned and are intended for Apple silicon.
   - Linux: GTK 3 and WebKitGTK 4.1 (e.g., Ubuntu 22.04 and later)
 - CPU
   - x86-64: must support AVX2 instructions
@@ -53,7 +52,7 @@ See the [WASM Postflop repository] for more detailed comparisons, including some
 
 You can download the app from the [GitHub releases page].
 
-[GitHub releases page]: https://github.com/b-inary/desktop-postflop/releases
+[GitHub releases page]: ../../releases
 
 - Windows
   - The installer version (.msi) automatically installs dependent runtimes.
@@ -62,6 +61,8 @@ You can download the app from the [GitHub releases page].
 - Linux
   - AppImage should work on most Linux distributions.
   - Alternatively, the .deb package is available for Debian-based distributions, including Ubuntu.
+- macOS
+  - The Apple silicon `.dmg` is unsigned and not notarized; macOS Gatekeeper may block it.
 
 [WebView2 runtime]: https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section
 
@@ -119,6 +120,33 @@ If you want to use stable Rust (at least 1.90) instead of nightly Rust, remove t
 [Rust]: https://www.rust-lang.org/learn/get-started
 [Node.js]: https://nodejs.org/en/
 [Tauri documentation]: https://v2.tauri.app/start/prerequisites/
+
+## Publishing a release
+
+Push a version tag to run the GitHub Actions release workflow. It builds Windows
+x86-64 (`.msi` and portable `.exe`), Linux x86-64 (`.deb` and `.AppImage`),
+and macOS Apple silicon (`.dmg`). Once all three builds succeed, the workflow
+publishes a GitHub Release with generated notes; a version containing a hyphen
+is marked as a prerelease. The macOS build is unsigned and not notarized.
+
+Before tagging, update the version in `package.json`, `package-lock.json`,
+`src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml` to the same value.
+For example, `npm version 0.2.8 --no-git-tag-version` updates both npm files;
+update the two Tauri/Rust files separately and commit all changes. Then push the
+commit and its tag (replace `lzy-gh` with your remote name if needed):
+
+```sh
+git push lzy-gh HEAD
+git tag v0.2.8
+git push lzy-gh v0.2.8
+```
+
+The tag must start with `v` and match all four version files. Check the Actions
+tab for progress and failures. The workflow checks out `postflop-solver` from
+the same GitHub owner using its default branch, so that repository must be
+accessible to the workflow and contain the required backend changes. Its current
+default-branch commit is used for each run; it is not pinned to the desktop tag.
+The release job needs permission to write repository contents.
 
 ## ~~Roadmap (in order of priority)~~
 

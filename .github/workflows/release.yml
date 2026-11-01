@@ -1,21 +1,36 @@
 name: Release
+
 on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  release:
-    defaults:
-      run:
-        working-directory: desktop-postflop
+  build:
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest, ubuntu-22.04]
+        include:
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            files: |
+              desktop-postflop/src-tauri/target/x86_64-pc-windows-msvc/release/desktop-postflop.exe
+              desktop-postflop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
+          - platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            files: |
+              desktop-postflop/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
+              desktop-postflop/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            files: desktop-postflop/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
     runs-on: ${{ matrix.platform }}
-
+    defaults:
+      run:
+        working-directory: desktop-postflop
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,15 +43,21 @@ jobs:
           repository: ${{ github.repository_owner }}/postflop-solver
           path: postflop-solver
 
-      - name: Setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Check tag and package versions
+        run: node scripts/check-release-version.cjs
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
 
       - name: Setup Rust nightly
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-2026-10-24
+          targets: ${{ matrix.target }}
 
       - name: Install dependencies (Linux)
         if: matrix.platform == 'ubuntu-22.04'
@@ -47,28 +68,33 @@ jobs:
       - name: Install app dependencies
         run: npm ci
 
-      - name: Build the app (Windows)
-        if: matrix.platform == 'windows-latest'
-        run: npm run tauri build -- --target x86_64-pc-windows-msvc
+      - name: Build the app
+        run: npm run tauri build -- --target ${{ matrix.target }}
 
-      - name: Build the app (Linux)
-        if: matrix.platform == 'ubuntu-22.04'
-        run: npm run tauri build -- --target x86_64-unknown-linux-gnu
-
-      - name: Upload artifacts (Windows)
-        if: matrix.platform == 'windows-latest'
-        uses: softprops/action-gh-release@v1
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          draft: true
-          files: |
-            desktop-postflop/src-tauri/target/x86_64-pc-windows-msvc/release/desktop-postflop.exe
-            desktop-postflop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
+          name: release-${{ matrix.target }}
+          path: ${{ matrix.files }}
+          if-no-files-found: error
 
-      - name: Upload artifacts (Linux)
-        if: matrix.platform == 'ubuntu-22.04'
-        uses: softprops/action-gh-release@v1
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          draft: true
-          files: |
-            desktop-postflop/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
-            desktop-postflop/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
+          pattern: release-*
+          path: release-artifacts
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          fail_on_unmatched_files: true
+          files: release-artifacts/**/*
