@@ -20,7 +20,7 @@ tauri = { version = "2.12", features = [] }
 tauri-plugin-dialog = "2.8"
 tauri-plugin-fs = "2.7"
 tauri-plugin-opener = "2.7"
-postflop-solver = { path = "../../postflop-solver", features = ["custom-alloc", "zstd"] }
+postflop-solver = { git = "https://github.com/liziyi-gh/postflop-solver.git", branch = "main", features = ["custom-alloc", "zstd"] }
 rayon = "1.8.0"
 sysinfo = "0.29.10"
 

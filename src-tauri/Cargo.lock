@@ -2549,6 +2549,7 @@ dependencies = [
 [[package]]
 name = "postflop-solver"
 version = "0.1.0"
+source = "git+https://github.com/liziyi-gh/postflop-solver.git?branch=main#f1b3cc30fe9c328e044cf4787e7883fe5e70140b"
 dependencies = [
  "bincode",
  "once_cell",

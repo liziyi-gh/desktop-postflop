@@ -92,11 +92,13 @@ the old WebKitGTK 4.0 package is no longer used. See the [Tauri documentation] f
 The project pins its nightly toolchain in [rust-toolchain.toml](./rust-toolchain.toml)
 for the solver's custom allocator; rustup selects it automatically without changing your global default.
 
-Place your maintained `postflop-solver` repository beside this repository. The Cargo path
-dependency uses `../postflop-solver` relative to the desktop repository root. This local
-backend must include `PostFlopGame::restart_solving()` for node locking.
-The release workflow similarly checks out `postflop-solver` from the same GitHub owner,
-so publish the backend changes there before running CI.
+Cargo downloads the maintained solver from
+[`liziyi-gh/postflop-solver`](https://github.com/liziyi-gh/postflop-solver).
+The dependency follows its `main` branch; no sibling checkout is required.
+GitHub Actions runs `cargo update --manifest-path src-tauri/Cargo.toml -p postflop-solver`
+before each build to fetch the latest commit, overriding the revision recorded
+in `src-tauri/Cargo.lock`. Run the same command locally to refresh the solver.
+Push local solver changes to that repository's `main` branch before releasing.
 
 Then clone this reporitory and run the following commands:
 
@@ -113,8 +115,8 @@ If you want to use stable Rust (at least 1.90) instead of nightly Rust, remove t
 ```diff
 [dependencies]
 ...
-- postflop-solver = { path = "../../postflop-solver", features = ["custom-alloc", "zstd"] }
-+ postflop-solver = { path = "../../postflop-solver", features = ["zstd"] }
+- postflop-solver = { git = "https://github.com/liziyi-gh/postflop-solver.git", branch = "main", features = ["custom-alloc", "zstd"] }
++ postflop-solver = { git = "https://github.com/liziyi-gh/postflop-solver.git", branch = "main", features = ["zstd"] }
 ```
 
 [Rust]: https://www.rust-lang.org/learn/get-started
@@ -142,10 +144,9 @@ git push lzy-gh v0.2.8
 ```
 
 The tag must start with `v` and match all four version files. Check the Actions
-tab for progress and failures. The workflow checks out `postflop-solver` from
-the same GitHub owner using its default branch, so that repository must be
-accessible to the workflow and contain the required backend changes. Its current
-default-branch commit is used for each run; it is not pinned to the desktop tag.
+tab for progress and failures. Each build fetches the latest `postflop-solver`
+commit on `main` directly from GitHub. Push local solver changes before creating
+the desktop release tag. Rebuilding the same tag can use a newer solver commit.
 The release job needs permission to write repository contents.
 
 ## ~~Roadmap (in order of priority)~~

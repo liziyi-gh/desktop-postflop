@@ -37,12 +37,6 @@ jobs:
         with:
           path: desktop-postflop
 
-      - name: Checkout maintained solver
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository_owner }}/postflop-solver
-          path: postflop-solver
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -67,6 +61,9 @@ jobs:
 
       - name: Install app dependencies
         run: npm ci
+
+      - name: Update solver to latest main
+        run: cargo update --manifest-path src-tauri/Cargo.toml -p postflop-solver
 
       - name: Build the app
         run: npm run tauri build -- --target ${{ matrix.target }}
